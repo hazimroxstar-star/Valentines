@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Valentine?</title>
+  <style>
+    :root{
+      --bg1:#0f1020;
+      --bg2:#1b1d3a;
+      --card:#ffffff12;
+      --card2:#ffffff18;
+      --text:#f7f7fb;
+      --muted:#c9c9de;
+      --yes:#4ade80;
+      --no:#fb7185;
+      --shadow: 0 20px 60px rgba(0,0,0,.35);
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      min-height:100vh;
+      display:grid;
+      place-items:center;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text);
+      background: radial-gradient(1200px 800px at 20% 20%, #ff4d8d22, transparent 55%),
+                  radial-gradient(900px 700px at 80% 30%, #8b5cf622, transparent 55%),
+                  linear-gradient(180deg, var(--bg1), var(--bg2));
+      overflow:hidden;
+    }
+
+    .hearts{
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      opacity:.35;
+      filter: blur(0.2px);
+      background:
+        radial-gradient(circle at 10% 20%, #ff4d8d33 0 2px, transparent 3px),
+        radial-gradient(circle at 35% 70%, #ffffff22 0 2px, transparent 3px),
+        radial-gradient(circle at 80% 40%, #8b5cf633 0 2px, transparent 3px),
+        radial-gradient(circle at 60% 15%, #ffffff1f 0 2px, transparent 3px);
+      background-size: 240px 240px;
+      animation: drift 14s linear infinite;
+    }
+    @keyframes drift{
+      from { transform: translateY(0); }
+      to   { transform: translateY(-80px); }
+    }
+
+    .wrap{
+      width:min(680px, 92vw);
+      padding: 22px;
+    }
+
+    .card{
+      background: linear-gradient(135deg, var(--card), var(--card2));
+      border: 1px solid #ffffff1f;
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      padding: 26px 22px;
+      text-align:center;
+      transform: scale(1);
+      transition: transform 260ms ease;
+      backdrop-filter: blur(8px);
+    }
+
+    h1{
+      margin: 0 0 10px 0;
+      font-size: clamp(26px, 3vw, 34px);
+      letter-spacing: 0.2px;
+    }
+    p{
+      margin: 0 auto 18px auto;
+      max-width: 46ch;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.45;
+    }
+
+    .message{
+      font-size: clamp(18px, 2.4vw, 22px);
+      color: var(--text);
+      margin-top: 6px;
+      min-height: 2.8em;
+      display:grid;
+      place-items:center;
+      padding: 8px 10px;
+    }
+
+    .buttons{
+      margin-top: 16px;
+      display:flex;
+      gap: 12px;
+      justify-content:center;
+      flex-wrap:wrap;
+    }
+
+    button{
+      border:0;
+      border-radius: 999px;
+      padding: 12px 18px;
+      font-weight: 650;
+      cursor:pointer;
+      transition: transform 120ms ease, filter 120ms ease;
+      min-width: 120px;
+    }
+    button:hover{ transform: translateY(-1px); filter: brightness(1.05); }
+    button:active{ transform: translateY(1px); }
+
+    .yes{ background: var(--yes); color: #04210f; }
+    .no { background: var(--no);  color: #2a060d; }
+
+    .tiny{
+      margin-top: 14px;
+      font-size: 12px;
+      opacity: .75;
+    }
+  </style>
+</head>
+<body>
+  <div class="hearts"></div>
+
+  <div class="wrap">
+    <div class="card" id="card">
+      <h1>To my Darling Zahra 💘</h1>
+      <p>Choose wisely… the universe is watching us.</p>
+
+      <div class="message" id="message">
+    I still remember the first time I saw you sitting right by my table in that cafe looking effortlessly beautiful, all sweet and innocent… and my heart immediately decided to start doing cardio.
+
+I took one brave gulp, told myself “okay, don’t be weird,” and somehow still went for it because you felt worth every ounce of courage I had.
+
+And now, fast forward almost a year… here we are. Me, still a little nervous, still a little obsessed (in a normal, flattering way), and still very sure about one thing:
+
+Will you be my other half this Valentine’s
+and make it official that I’m yours and you’re mine?
+      </div>
+
+      <div class="buttons">
+        <!-- type="button" prevents any form-submit refresh behavior -->
+        <button class="yes" id="yesBtn" type="button">Yes</button>
+        <button class="no"  id="noBtn"  type="button">No</button>
+      </div>
+
+      <div class="tiny"></div>
+    </div>
+  </div>
+
+  <script>
+    // 1) Customize these messages (each Yes click moves to the next line)
+    const yesMessages = [
+      "Are you Sureee?. 💓",
+      "Are you REALLY sure? Because I’m about to get even happier. 😭",
+      "Promising you my cuddles, and love. 🍫✨",
+      "Locking inn...: you’re my favorite soul to exist. 🫶",
+      "One last thing… click Yes again for your surprise 👀"
+    ];
+
+    // 2) Customize where to send her at the end
+    const finalRedirectUrl = "surprise.html"; // <-- change this
+
+    const card = document.getElementById("card");
+    const message = document.getElementById("message");
+    const yesBtn = document.getElementById("yesBtn");
+    const noBtn  = document.getElementById("noBtn");
+
+    let step = -1;       // starts before first message
+    let scale = 1.0;     // card growth factor
+
+    // NO: do absolutely nothing (no text change, no refresh, no animation)
+    noBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      // intentionally empty: page stays static
+    });
+
+    // YES: grow + change text each click, then redirect
+    yesBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+
+      step += 1;
+
+      // Grow the card each click (cap it so it doesn't become absurd on tiny screens)
+      scale = Math.min(scale + 0.12, 1.85);
+      card.style.transform = `scale(${scale})`;
+
+      // If there are messages left, show next one
+      if (step < yesMessages.length) {
+        message.textContent = yesMessages[step];
+        return;
+      }
+
+      // Final stage: show a last line, then redirect
+      message.textContent = "YAY. Redirecting to your surprise… 💝";
+      yesBtn.disabled = true; // prevents double clicks
+      yesBtn.style.cursor = "not-allowed";
+      yesBtn.style.opacity = "0.75";
+
+      setTimeout(() => {
+        window.location.href = finalRedirectUrl;
+      }, 900);
+    });
+  </script>
+</body>
+</html>
